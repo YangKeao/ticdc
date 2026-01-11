@@ -157,6 +157,10 @@ type ServerConfig struct {
 	KVClient  *KVClientConfig      `toml:"kv-client" json:"kv-client"`
 	Debug     *DebugConfig         `toml:"debug" json:"debug"`
 	ClusterID string               `toml:"cluster-id" json:"cluster-id"`
+	// DownstreamInterface is the interface name that downstream connections should bind to.
+	// This configuration is only effective on Linux.
+	// TODO: maybe it's possible to set it for each changefeed.
+	DownstreamInterface string `toml:"downstream-interface" json:"downstream-interface"`
 	// Deprecated: we don't use this field anymore.
 	GcTunerMemoryThreshold uint64  `toml:"gc-tuner-memory-threshold" json:"gc-tuner-memory-threshold"`
 	MemoryLimitPercentage  float64 `toml:"memory-limit-percentage" json:"memory-limit-percentage"`

@@ -28,6 +28,7 @@ import (
 	"github.com/pingcap/errors"
 	"github.com/pingcap/log"
 	commonEvent "github.com/pingcap/ticdc/pkg/common/event"
+	pkconfig "github.com/pingcap/ticdc/pkg/config"
 	cerror "github.com/pingcap/ticdc/pkg/errors"
 	"github.com/pingcap/tidb/br/pkg/version"
 	"github.com/pingcap/tidb/dumpling/export"
@@ -122,7 +123,11 @@ func GenBasicDSN(cfg *Config) (*dmysql.Config, error) {
 	var dsn *dmysql.Config
 	var err error
 	host := net.JoinHostPort(hostName, port)
-	dsnStr := fmt.Sprintf("%s:%s@tcp(%s)/%s", username, password, host, cfg.TLS)
+	protocol := "tcp"
+	if pkconfig.GetGlobalServerConfig().DownstreamInterface != "" {
+		protocol = customMySQLNetwork
+	}
+	dsnStr := fmt.Sprintf("%s:%s@%s(%s)/%s", username, password, protocol, host, cfg.TLS)
 	if dsn, err = dmysql.ParseDSN(dsnStr); err != nil {
 		return nil, errors.Trace(err)
 	}

@@ -22,8 +22,10 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/pingcap/log"
+	pkconfig "github.com/pingcap/ticdc/pkg/config"
 	"github.com/pingcap/ticdc/pkg/errors"
 	"github.com/pingcap/ticdc/pkg/security"
+	"github.com/pingcap/ticdc/pkg/util"
 	"go.uber.org/zap"
 )
 
@@ -73,6 +75,12 @@ func newSaramaConfig(ctx context.Context, o *options) (*sarama.Config, error) {
 	config.Net.DialTimeout = o.DialTimeout
 	config.Net.WriteTimeout = o.WriteTimeout
 	config.Net.ReadTimeout = o.ReadTimeout
+
+	interfaceName := pkconfig.GetGlobalServerConfig().DownstreamInterface
+	if interfaceName != "" {
+		config.Net.Proxy.Enable = true
+		config.Net.Proxy.Dialer = util.CreateDialer(interfaceName)
+	}
 
 	config.Producer.Partitioner = sarama.NewManualPartitioner
 	config.Producer.MaxMessageBytes = o.MaxMessageBytes

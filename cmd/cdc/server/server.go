@@ -64,6 +64,7 @@ func newOptions() *options {
 func (o *options) addFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&o.serverConfig.Newarch, "newarch", "x", o.serverConfig.Newarch, "Run the new architecture of TiCDC server")
 	cmd.Flags().StringVar(&o.serverConfig.ClusterID, "cluster-id", "default", "Set cdc cluster id")
+	cmd.Flags().StringVar(&o.serverConfig.DownstreamInterface, "downstream-interface", "", "Set the network interface name for downstream connections to bind to (Linux only)")
 	cmd.Flags().StringVar(&o.serverConfig.Addr, "addr", o.serverConfig.Addr, "Set the listening address")
 	cmd.Flags().StringVar(&o.serverConfig.AdvertiseAddr, "advertise-addr", o.serverConfig.AdvertiseAddr, "Set the advertise listening address for client communication")
 

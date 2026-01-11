@@ -18,9 +18,11 @@ import (
 	"database/sql"
 	"fmt"
 	"math"
+	"net"
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	dmysql "github.com/go-sql-driver/mysql"
@@ -290,6 +292,7 @@ func NewMysqlConfigAndDB(
 	ctx context.Context, changefeedID common.ChangeFeedID, sinkURI *url.URL, config *config.ChangefeedConfig,
 ) (*Config, *sql.DB, error) {
 	log.Info("create db connection", zap.String("sinkURI", sinkURI.String()))
+	registerCustomMySQLNetwork()
 	// create db connection
 	cfg := New()
 	err := cfg.Apply(sinkURI, changefeedID, config)
@@ -633,4 +636,20 @@ func (c *Config) setWorkerCountByDownstream() {
 	} else {
 		c.WorkerCount = DefaultMySQLWorkerCount
 	}
+}
+
+var (
+	mysqlNetworkOnce   sync.Once
+	customMySQLNetwork = "ticdc-mysql"
+)
+
+func registerCustomMySQLNetwork() {
+	mysqlNetworkOnce.Do(func() {
+		interfaceName := config.GetGlobalServerConfig().DownstreamInterface
+		if interfaceName != "" {
+			dmysql.RegisterDialContext(customMySQLNetwork, func(ctx context.Context, addr string) (net.Conn, error) {
+				return util.DialContextFunc(interfaceName)(ctx, "tcp", addr)
+			})
+		}
+	})
 }
